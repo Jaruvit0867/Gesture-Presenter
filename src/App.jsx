@@ -168,11 +168,7 @@ function MainApp() {
         <div className="max-w-7xl mx-auto">
           {!isFullscreen && (
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} className="text-center mb-16 pt-8">
-              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-aurora-cyan/20 mb-8">
-                <Sparkles className="w-4 h-4 text-aurora-cyan" />
-                <span className="text-xs font-medium text-aurora-cyan uppercase tracking-wider">Powered by AI Vision</span>
-              </motion.div>
-
+              
               <h2 className="font-display text-5xl md:text-7xl font-bold text-white tracking-tight mb-6 leading-tight">
                 Control Slides with<br /><span className="gradient-text">Hand Gestures</span>
               </h2>
@@ -185,7 +181,7 @@ function MainApp() {
                 {[
                   { icon: Zap, label: 'Real-time Detection', color: 'aurora-cyan' },
                   { icon: Shield, label: '100% Private', color: 'aurora-emerald' },
-                  { icon: Sparkles, label: 'AI-Powered', color: 'aurora-purple' },
+                  { icon: Sparkles, label: 'Computer Vision', color: 'aurora-purple' },
                 ].map((item, i) => (
                   <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 + i * 0.1 }} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-dark-800/50 border border-dark-700/50">
                     <item.icon className={`w-4 h-4 text-${item.color}`} />
@@ -271,7 +267,7 @@ function MainApp() {
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-aurora-cyan to-aurora-purple flex items-center justify-center"><Presentation className="w-5 h-5 text-white" /></div>
-                <div><p className="font-display font-bold text-white">GesturePresenter</p><p className="text-xs text-slate-500">AI-Powered Control</p></div>
+                <div><p className="font-display font-bold text-white">GesturePresenter</p><p className="text-xs text-slate-500">Gesture Control</p></div>
               </div>
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-3 text-xs text-slate-500">
@@ -283,7 +279,6 @@ function MainApp() {
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-500"><Shield className="w-4 h-4 text-aurora-emerald" /><span>100% Private - All processing happens locally</span></div>
             </div>
-            <div className="mt-8 pt-8 border-t border-dark-800 text-center"><p className="text-xs text-slate-600">Designed with passion by Opus 4.5</p></div>
           </div>
         </footer>
       )}

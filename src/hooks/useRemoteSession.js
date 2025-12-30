@@ -125,14 +125,7 @@ export const useRemoteSession = ({ onCommand, currentPage, totalPages }) => {
       if (onCommandRef.current) onCommandRef.current(action);
     });
 
-    channel.presence.enter({ role: 'presenter' }, (err) => {
-      if (err) {
-        console.error('[Presenter] Failed to enter presence:', err);
-      } else {
-        console.log('[Presenter] Entered presence as presenter');
-      }
-    });
-
+    // Subscribe to presence events first
     channel.presence.subscribe('enter', (member) => {
       console.log('[Presenter] Member entered:', member.clientId, member.data);
       if (member.data?.role === 'remote') {
@@ -151,12 +144,28 @@ export const useRemoteSession = ({ onCommand, currentPage, totalPages }) => {
       if (member.data?.role === 'remote') setRemoteConnected(false);
     });
 
-    channel.presence.get((err, members) => {
-      console.log('[Presenter] Current presence members:', err, members);
-      if (!err && members) {
-        const hasRemote = members.some(m => m.data?.role === 'remote');
-        console.log('[Presenter] Has remote:', hasRemote);
-        setRemoteConnected(hasRemote);
+    // Then enter presence and check existing members
+    channel.presence.enter({ role: 'presenter' }, (err) => {
+      if (err) {
+        console.error('[Presenter] Failed to enter presence:', err);
+      } else {
+        console.log('[Presenter] Entered presence as presenter');
+        // Check existing members AFTER we've entered
+        channel.presence.get((err, members) => {
+          console.log('[Presenter] Current presence members:', err, members);
+          if (!err && members) {
+            const hasRemote = members.some(m => m.data?.role === 'remote');
+            console.log('[Presenter] Has remote:', hasRemote);
+            if (hasRemote) {
+              setRemoteConnected(true);
+              // Send sync to any existing remotes
+              channel.publish('sync', {
+                currentPage: currentPageRef.current,
+                totalPages: totalPagesRef.current
+              });
+            }
+          }
+        });
       }
     });
 
@@ -246,14 +255,7 @@ export const useRemoteController = (sessionId) => {
         setTotalPages(message.data.totalPages);
       });
 
-      channel.presence.enter({ role: 'remote' }, (err) => {
-        if (err) {
-          console.error('[Remote] Failed to enter presence:', err);
-        } else {
-          console.log('[Remote] Entered presence as remote');
-        }
-      });
-
+      // Subscribe to presence events first
       channel.presence.subscribe('enter', (member) => {
         console.log('[Remote] Member entered:', member.clientId, member.data);
         if (member.data?.role === 'presenter') {
@@ -267,12 +269,21 @@ export const useRemoteController = (sessionId) => {
         if (member.data?.role === 'presenter') setPresenterConnected(false);
       });
 
-      channel.presence.get((err, members) => {
-        console.log('[Remote] Current presence members:', err, members);
-        if (!err && members) {
-          const hasPresenter = members.some(m => m.data?.role === 'presenter');
-          console.log('[Remote] Has presenter:', hasPresenter);
-          setPresenterConnected(hasPresenter);
+      // Then enter presence and check existing members
+      channel.presence.enter({ role: 'remote' }, (err) => {
+        if (err) {
+          console.error('[Remote] Failed to enter presence:', err);
+        } else {
+          console.log('[Remote] Entered presence as remote');
+          // Check existing members AFTER we've entered
+          channel.presence.get((err, members) => {
+            console.log('[Remote] Current presence members:', err, members);
+            if (!err && members) {
+              const hasPresenter = members.some(m => m.data?.role === 'presenter');
+              console.log('[Remote] Has presenter:', hasPresenter);
+              setPresenterConnected(hasPresenter);
+            }
+          });
         }
       });
     });
