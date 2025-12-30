@@ -18,6 +18,21 @@ export const useRemoteSession = ({ onCommand, currentPage, totalPages }) => {
   const ablyRef = useRef(null);
   const channelRef = useRef(null);
 
+  // Use refs to avoid stale closures in callbacks
+  const onCommandRef = useRef(onCommand);
+  const currentPageRef = useRef(currentPage);
+  const totalPagesRef = useRef(totalPages);
+
+  // Keep refs updated
+  useEffect(() => {
+    onCommandRef.current = onCommand;
+  }, [onCommand]);
+
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+    totalPagesRef.current = totalPages;
+  }, [currentPage, totalPages]);
+
   const initializeAbly = useCallback(async () => {
     const apiKey = import.meta.env.VITE_ABLY_API_KEY;
     if (!apiKey) {
@@ -102,9 +117,10 @@ export const useRemoteSession = ({ onCommand, currentPage, totalPages }) => {
     const channel = ablyRef.current.channels.get(channelName);
     channelRef.current = channel;
 
+    // Use ref to always get latest callback
     channel.subscribe('command', (message) => {
       const { action } = message.data;
-      if (onCommand) onCommand(action);
+      if (onCommandRef.current) onCommandRef.current(action);
     });
 
     channel.presence.enter({ role: 'presenter' });
@@ -112,7 +128,11 @@ export const useRemoteSession = ({ onCommand, currentPage, totalPages }) => {
     channel.presence.subscribe('enter', (member) => {
       if (member.data?.role === 'remote') {
         setRemoteConnected(true);
-        channel.publish('sync', { currentPage, totalPages });
+        // Use refs to get latest values
+        channel.publish('sync', {
+          currentPage: currentPageRef.current,
+          totalPages: totalPagesRef.current
+        });
       }
     });
 
@@ -130,7 +150,7 @@ export const useRemoteSession = ({ onCommand, currentPage, totalPages }) => {
       channel.unsubscribe();
       channel.presence.leave();
     };
-  }, [sessionId, onCommand]);
+  }, [sessionId]); // Remove onCommand from dependencies - use ref instead
 
   useEffect(() => {
     if (!channelRef.current || !remoteConnected) return;
