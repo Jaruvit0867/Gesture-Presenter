@@ -114,19 +114,29 @@ export const useRemoteSession = ({ onCommand, currentPage, totalPages }) => {
     if (!sessionId || !ablyRef.current) return;
 
     const channelName = `presenter-${sessionId}`;
+    console.log('[Presenter] Setting up channel:', channelName);
     const channel = ablyRef.current.channels.get(channelName);
     channelRef.current = channel;
 
     // Use ref to always get latest callback
     channel.subscribe('command', (message) => {
+      console.log('[Presenter] Received command:', message.data);
       const { action } = message.data;
       if (onCommandRef.current) onCommandRef.current(action);
     });
 
-    channel.presence.enter({ role: 'presenter' });
+    channel.presence.enter({ role: 'presenter' }, (err) => {
+      if (err) {
+        console.error('[Presenter] Failed to enter presence:', err);
+      } else {
+        console.log('[Presenter] Entered presence as presenter');
+      }
+    });
 
     channel.presence.subscribe('enter', (member) => {
+      console.log('[Presenter] Member entered:', member.clientId, member.data);
       if (member.data?.role === 'remote') {
+        console.log('[Presenter] Remote connected! Sending sync...');
         setRemoteConnected(true);
         // Use refs to get latest values
         channel.publish('sync', {
@@ -137,16 +147,21 @@ export const useRemoteSession = ({ onCommand, currentPage, totalPages }) => {
     });
 
     channel.presence.subscribe('leave', (member) => {
+      console.log('[Presenter] Member left:', member.clientId, member.data);
       if (member.data?.role === 'remote') setRemoteConnected(false);
     });
 
     channel.presence.get((err, members) => {
+      console.log('[Presenter] Current presence members:', err, members);
       if (!err && members) {
-        setRemoteConnected(members.some(m => m.data?.role === 'remote'));
+        const hasRemote = members.some(m => m.data?.role === 'remote');
+        console.log('[Presenter] Has remote:', hasRemote);
+        setRemoteConnected(hasRemote);
       }
     });
 
     return () => {
+      console.log('[Presenter] Cleaning up channel');
       channel.unsubscribe();
       channel.presence.leave();
     };
@@ -216,31 +231,48 @@ export const useRemoteController = (sessionId) => {
     ablyRef.current = ably;
 
     ably.connection.on('connected', () => {
+      console.log('[Remote] Ably connected');
       setIsConnected(true);
       setConnectionError(null);
 
       const channelName = `presenter-${sessionId}`;
+      console.log('[Remote] Joining channel:', channelName);
       const channel = ably.channels.get(channelName);
       channelRef.current = channel;
 
       channel.subscribe('sync', (message) => {
+        console.log('[Remote] Received sync:', message.data);
         setCurrentPage(message.data.currentPage);
         setTotalPages(message.data.totalPages);
       });
 
-      channel.presence.enter({ role: 'remote' });
+      channel.presence.enter({ role: 'remote' }, (err) => {
+        if (err) {
+          console.error('[Remote] Failed to enter presence:', err);
+        } else {
+          console.log('[Remote] Entered presence as remote');
+        }
+      });
 
       channel.presence.subscribe('enter', (member) => {
-        if (member.data?.role === 'presenter') setPresenterConnected(true);
+        console.log('[Remote] Member entered:', member.clientId, member.data);
+        if (member.data?.role === 'presenter') {
+          console.log('[Remote] Presenter connected!');
+          setPresenterConnected(true);
+        }
       });
 
       channel.presence.subscribe('leave', (member) => {
+        console.log('[Remote] Member left:', member.clientId, member.data);
         if (member.data?.role === 'presenter') setPresenterConnected(false);
       });
 
       channel.presence.get((err, members) => {
+        console.log('[Remote] Current presence members:', err, members);
         if (!err && members) {
-          setPresenterConnected(members.some(m => m.data?.role === 'presenter'));
+          const hasPresenter = members.some(m => m.data?.role === 'presenter');
+          console.log('[Remote] Has presenter:', hasPresenter);
+          setPresenterConnected(hasPresenter);
         }
       });
     });
