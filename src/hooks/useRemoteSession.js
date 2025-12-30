@@ -183,11 +183,22 @@ export const useRemoteController = (sessionId) => {
 
   const ablyRef = useRef(null);
   const channelRef = useRef(null);
+  const presenterConnectedRef = useRef(presenterConnected);
+
+  // Keep ref updated
+  useEffect(() => {
+    presenterConnectedRef.current = presenterConnected;
+  }, [presenterConnected]);
 
   const sendCommand = useCallback((action) => {
-    if (!channelRef.current || !presenterConnected) return;
+    console.log('sendCommand called:', action, 'channel:', !!channelRef.current, 'presenter:', presenterConnectedRef.current);
+    if (!channelRef.current) {
+      console.log('No channel');
+      return;
+    }
+    // Send command regardless of presenter status - let the channel handle it
     channelRef.current.publish('command', { action });
-  }, [presenterConnected]);
+  }, []);
 
   useEffect(() => {
     if (!sessionId) return;

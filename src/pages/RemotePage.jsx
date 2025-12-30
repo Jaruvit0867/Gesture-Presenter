@@ -17,7 +17,7 @@ const RemotePage = () => {
   };
 
   const handlePrev = () => {
-    if (!presenterConnected) return;
+    console.log('handlePrev - presenterConnected:', presenterConnected);
     sendCommand('prev');
     setLastAction('prev');
     triggerHaptic('medium');
@@ -25,7 +25,7 @@ const RemotePage = () => {
   };
 
   const handleNext = () => {
-    if (!presenterConnected) return;
+    console.log('handleNext - presenterConnected:', presenterConnected);
     sendCommand('next');
     setLastAction('next');
     triggerHaptic('medium');
