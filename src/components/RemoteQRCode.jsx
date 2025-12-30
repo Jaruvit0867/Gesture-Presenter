@@ -39,36 +39,101 @@ const RemoteQRCode = ({
           if (!isEnabled) onToggle();
           setIsModalOpen(true);
         }}
-        className={`
-          relative w-full py-3 px-4 rounded-xl flex items-center justify-center gap-3
-          font-medium text-sm transition-all duration-300
-          ${isEnabled
-            ? remoteConnected
-              ? 'bg-aurora-cyan/20 text-aurora-cyan border border-aurora-cyan/30'
-              : 'bg-aurora-purple/20 text-aurora-purple border border-aurora-purple/30'
-            : 'bg-white/5 text-white/70 border border-white/10 hover:bg-white/10 hover:text-white'
-          }
-        `}
+        className="relative w-full group"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        <Smartphone className="w-4 h-4" />
-        <span>
-          {isEnabled
-            ? remoteConnected ? 'Remote Connected' : 'Waiting for Remote...'
-            : 'Remote Control'
+        {/* Glow effect behind button */}
+        <motion.div
+          className={`absolute -inset-1 rounded-2xl blur-lg transition-all duration-500 ${
+            isEnabled
+              ? remoteConnected
+                ? 'bg-gradient-to-r from-aurora-cyan/50 to-aurora-emerald/50'
+                : 'bg-gradient-to-r from-aurora-purple/50 to-aurora-pink/50'
+              : 'bg-gradient-to-r from-aurora-purple/30 to-aurora-cyan/30 opacity-0 group-hover:opacity-100'
+          }`}
+          animate={isEnabled && !remoteConnected ? {
+            opacity: [0.5, 0.8, 0.5],
+          } : {}}
+          transition={{ duration: 2, repeat: Infinity }}
+        />
+
+        {/* Main button */}
+        <div className={`
+          relative py-4 px-5 rounded-xl flex items-center justify-between gap-3
+          font-semibold text-sm transition-all duration-300 overflow-hidden
+          ${isEnabled
+            ? remoteConnected
+              ? 'bg-gradient-to-r from-aurora-cyan/20 to-aurora-emerald/20 text-aurora-cyan border border-aurora-cyan/40'
+              : 'bg-gradient-to-r from-aurora-purple/20 to-aurora-pink/20 text-aurora-purple border border-aurora-purple/40'
+            : 'bg-gradient-to-r from-aurora-purple/10 to-aurora-cyan/10 text-white border border-white/20 group-hover:border-aurora-purple/40'
           }
-        </span>
-        {isEnabled && (
-          <motion.span
-            className={`absolute right-3 w-2 h-2 rounded-full ${remoteConnected ? 'bg-aurora-cyan' : 'bg-aurora-purple'}`}
-            animate={{
-              scale: remoteConnected ? [1, 1.2, 1] : [1, 1.5, 1],
-              opacity: remoteConnected ? 1 : [1, 0.5, 1],
-            }}
-            transition={{ duration: remoteConnected ? 2 : 1.5, repeat: Infinity }}
-          />
-        )}
+        `}>
+          {/* Animated background shimmer */}
+          {!isEnabled && (
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12"
+              animate={{ x: ['-200%', '200%'] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+            />
+          )}
+
+          <div className="relative flex items-center gap-3">
+            <div className={`
+              p-2 rounded-lg transition-all duration-300
+              ${isEnabled
+                ? remoteConnected
+                  ? 'bg-aurora-cyan/20'
+                  : 'bg-aurora-purple/20'
+                : 'bg-white/10 group-hover:bg-aurora-purple/20'
+              }
+            `}>
+              <Smartphone className="w-5 h-5" />
+            </div>
+            <div className="text-left">
+              <span className="block">
+                {isEnabled
+                  ? remoteConnected ? 'Remote Connected' : 'Waiting for Remote...'
+                  : 'Mobile Remote'
+                }
+              </span>
+              <span className={`text-xs font-normal ${
+                isEnabled ? 'opacity-60' : 'text-white/50'
+              }`}>
+                {isEnabled
+                  ? remoteConnected ? 'Tap to view QR' : 'Scan QR to connect'
+                  : 'Control from your phone'
+                }
+              </span>
+            </div>
+          </div>
+
+          {/* Status indicator */}
+          <div className="relative flex items-center gap-2">
+            {isEnabled ? (
+              <motion.div
+                className={`w-3 h-3 rounded-full ${remoteConnected ? 'bg-aurora-cyan' : 'bg-aurora-purple'}`}
+                animate={{
+                  scale: remoteConnected ? [1, 1.2, 1] : [1, 1.5, 1],
+                  opacity: remoteConnected ? 1 : [1, 0.5, 1],
+                  boxShadow: remoteConnected
+                    ? ['0 0 10px #00f5ff', '0 0 20px #00f5ff', '0 0 10px #00f5ff']
+                    : ['0 0 10px #8b5cf6', '0 0 20px #8b5cf6', '0 0 10px #8b5cf6'],
+                }}
+                transition={{ duration: remoteConnected ? 2 : 1.5, repeat: Infinity }}
+              />
+            ) : (
+              <motion.div
+                className="flex items-center gap-1 py-1 px-2 rounded-full bg-aurora-purple/20 text-aurora-purple text-xs"
+                animate={{ opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <QrCode className="w-3 h-3" />
+                <span>QR</span>
+              </motion.div>
+            )}
+          </div>
+        </div>
       </motion.button>
 
       {createPortal(
