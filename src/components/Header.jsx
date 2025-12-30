@@ -69,7 +69,7 @@ export function Header() {
 
           {/* GitHub button */}
           <motion.a
-            href="https://github.com/Jaruvit0867/Gesture-Control-Presentation-System-WebApp-V2"
+            href="https://github.com/Jaruvit0867/Gesture-Presenter"
             target="_blank"
             rel="noopener noreferrer"
             className="group relative flex items-center gap-2.5 px-6 py-3 rounded-2xl overflow-hidden"
