@@ -253,6 +253,8 @@ export const useRemoteController = (sessionId) => {
         console.log('[Remote] Received sync:', message.data);
         setCurrentPage(message.data.currentPage);
         setTotalPages(message.data.totalPages);
+        // If we receive sync, presenter is definitely connected
+        setPresenterConnected(true);
       });
 
       // Subscribe to presence events first
