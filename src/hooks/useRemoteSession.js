@@ -240,7 +240,7 @@ export const useRemoteController = (sessionId) => {
     ablyRef.current = ably;
 
     ably.connection.on('connected', () => {
-      console.log('[Remote] Ably connected');
+      console.log('[Remote] Ably connected successfully');
       setIsConnected(true);
       setConnectionError(null);
 
@@ -249,58 +249,75 @@ export const useRemoteController = (sessionId) => {
       const channel = ably.channels.get(channelName);
       channelRef.current = channel;
 
-      channel.subscribe('sync', (message) => {
-        console.log('[Remote] Received sync:', message.data);
-        setCurrentPage(message.data.currentPage);
-        setTotalPages(message.data.totalPages);
-        // If we receive sync, presenter is definitely connected
-        setPresenterConnected(true);
-      });
-
-      // Subscribe to presence events first
-      channel.presence.subscribe('enter', (member) => {
-        console.log('[Remote] Member entered:', member.clientId, member.data);
-        if (member.data?.role === 'presenter') {
-          console.log('[Remote] Presenter connected!');
+      // Wrap subscription in try-catch
+      try {
+        channel.subscribe('sync', (message) => {
+          console.log('[Remote] Received sync:', message.data);
+          setCurrentPage(message.data.currentPage);
+          setTotalPages(message.data.totalPages);
+          // If we receive sync, presenter is definitely connected
           setPresenterConnected(true);
-        }
-      });
+        });
 
-      channel.presence.subscribe('leave', (member) => {
-        console.log('[Remote] Member left:', member.clientId, member.data);
-        if (member.data?.role === 'presenter') setPresenterConnected(false);
-      });
+        // Subscribe to presence events
+        channel.presence.subscribe('enter', (member) => {
+          console.log('[Remote] Member entered:', member.clientId, member.data);
+          if (member.data?.role === 'presenter') {
+            console.log('[Remote] Presenter detected via presence enter!');
+            setPresenterConnected(true);
+          }
+        });
 
-      // Then enter presence and check existing members
-      channel.presence.enter({ role: 'remote' }, (err) => {
-        if (err) {
-          console.error('[Remote] Failed to enter presence:', err);
-        } else {
-          console.log('[Remote] Entered presence as remote');
-          // Check existing members AFTER we've entered
-          channel.presence.get((err, members) => {
-            console.log('[Remote] Current presence members:', err, members);
-            if (!err && members) {
-              const hasPresenter = members.some(m => m.data?.role === 'presenter');
-              console.log('[Remote] Has presenter:', hasPresenter);
-              setPresenterConnected(hasPresenter);
-            }
-          });
-        }
-      });
+        channel.presence.subscribe('leave', (member) => {
+          console.log('[Remote] Member left:', member.clientId, member.data);
+          if (member.data?.role === 'presenter') {
+            console.log('[Remote] Presenter left');
+            setPresenterConnected(false);
+          }
+        });
+
+        // Enter presence
+        channel.presence.enter({ role: 'remote' }, (err) => {
+          if (err) {
+            console.warn('[Remote] Failed to enter presence (non-critical):', err);
+          } else {
+            console.log('[Remote] Entered presence as remote');
+            // Check for existing presenter
+            channel.presence.get((err, members) => {
+              if (members) {
+                const hasPresenter = members.some(m => m.data?.role === 'presenter');
+                console.log('[Remote] Initial presence check. Has presenter:', hasPresenter);
+                if (hasPresenter) setPresenterConnected(true);
+              }
+            });
+          }
+        });
+
+      } catch (subError) {
+        console.error('[Remote] Subscription error:', subError);
+      }
     });
 
-    ably.connection.on('failed', () => {
+    ably.connection.on('failed', (err) => {
+      console.error('[Remote] Connection failed:', err);
       setIsConnected(false);
-      setConnectionError('Connection failed. Please try again.');
+      setConnectionError('Connection to server failed. Please try again.');
     });
 
-    ably.connection.on('disconnected', () => setIsConnected(false));
+    ably.connection.on('disconnected', () => {
+      console.warn('[Remote] Disconnected');
+      setIsConnected(false);
+    });
 
     return () => {
       if (channelRef.current) {
-        channelRef.current.presence.leave();
-        channelRef.current.unsubscribe();
+        // Safe cleanup
+        try {
+          channelRef.current.presence.leave();
+          channelRef.current.unsubscribe();
+        } catch (e) {
+          console.warn('[Remote] Cleanup error:', e);
+        }
       }
       if (ablyRef.current) ablyRef.current.close();
     };

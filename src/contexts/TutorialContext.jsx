@@ -27,6 +27,7 @@ const STORAGE_KEY = 'gesture-presenter-tutorial';
 
 export function TutorialProvider({ children }) {
   const [isActive, setIsActive] = useState(false);
+  const [hasCompleted, setHasCompleted] = useState(false);
   const [currentStep, setCurrentStep] = useState(TUTORIAL_STEPS.WELCOME);
   const [completedSteps, setCompletedSteps] = useState([]);
   const [practiceSuccess, setPracticeSuccess] = useState({
@@ -44,14 +45,12 @@ export function TutorialProvider({ children }) {
       if (saved) {
         const data = JSON.parse(saved);
         if (data.hasCompletedTutorial) {
+          setHasCompleted(true);
           setIsActive(false);
         } else if (data.currentStep) {
           setCurrentStep(data.currentStep);
           setCompletedSteps(data.completedSteps || []);
         }
-      } else {
-        // First time user - auto start tutorial
-        setIsActive(true);
       }
     } catch (e) {
       console.error('Failed to load tutorial state:', e);
@@ -59,10 +58,12 @@ export function TutorialProvider({ children }) {
   }, []);
 
   // Save state to localStorage
-  const saveState = useCallback((hasCompleted = false) => {
+  const saveState = useCallback((completed = false) => {
     try {
+      if (completed) setHasCompleted(true);
+
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        hasCompletedTutorial: hasCompleted,
+        hasCompletedTutorial: completed,
         currentStep,
         completedSteps,
       }));
@@ -150,6 +151,7 @@ export function TutorialProvider({ children }) {
 
   const value = {
     isActive,
+    hasCompleted,
     currentStep,
     completedSteps,
     practiceSuccess,

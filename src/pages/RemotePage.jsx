@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Wifi, WifiOff, Smartphone, Presentation, Loader2, AlertCircle } from 'lucide-react';
 import { useRemoteController } from '../hooks/useRemoteSession';
+import { BackgroundParticles } from '../components/BackgroundParticles';
 
 const RemotePage = () => {
   const { sessionId } = useParams();
@@ -17,7 +18,6 @@ const RemotePage = () => {
   };
 
   const handlePrev = () => {
-    console.log('handlePrev - presenterConnected:', presenterConnected);
     sendCommand('prev');
     setLastAction('prev');
     triggerHaptic('medium');
@@ -25,7 +25,6 @@ const RemotePage = () => {
   };
 
   const handleNext = () => {
-    console.log('handleNext - presenterConnected:', presenterConnected);
     sendCommand('next');
     setLastAction('next');
     triggerHaptic('medium');
@@ -51,155 +50,159 @@ const RemotePage = () => {
 
   if (!isConnected && !connectionError) {
     return (
-      <div className="min-h-screen bg-[#030014] flex flex-col items-center justify-center p-6">
-        <motion.div
-          className="w-16 h-16 rounded-full border-4 border-aurora-purple/30 border-t-aurora-purple mb-6"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-        />
-        <p className="text-white/70 text-lg">Connecting...</p>
-        <p className="text-white/40 text-sm mt-2">Session: {sessionId}</p>
+      <div className="min-h-screen bg-dark-950 flex flex-col items-center justify-center p-6 text-white relative overflow-hidden">
+        <BackgroundParticles />
+        <div className="relative z-10 flex flex-col items-center">
+          <motion.div
+            className="w-12 h-12 rounded-full border-2 border-white/20 border-t-white mb-6"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+          />
+          <p className="text-white/70 font-medium">Connecting to Session...</p>
+          <p className="text-white/30 text-xs mt-2 font-mono tracking-wider">{sessionId}</p>
+        </div>
       </div>
     );
   }
 
   if (connectionError) {
     return (
-      <div className="min-h-screen bg-[#030014] flex flex-col items-center justify-center p-6">
-        <motion.div
-          className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-6"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-        >
-          <AlertCircle className="w-8 h-8 text-red-400" />
-        </motion.div>
-        <p className="text-white text-lg font-medium mb-2">Connection Failed</p>
-        <p className="text-white/50 text-sm text-center mb-6">{connectionError}</p>
-        <button onClick={() => window.location.reload()} className="py-3 px-6 rounded-xl bg-aurora-purple text-white font-medium">
-          Try Again
-        </button>
+      <div className="min-h-screen bg-dark-950 flex flex-col items-center justify-center p-6 text-white relative overflow-hidden">
+        <BackgroundParticles />
+        <div className="relative z-10 flex flex-col items-center text-center max-w-sm">
+          <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-6 border border-red-500/20">
+            <AlertCircle className="w-8 h-8 text-red-400" />
+          </div>
+          <h3 className="text-xl font-display font-bold mb-2">Connection Failed</h3>
+          <p className="text-white/50 text-sm mb-8">{connectionError}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="btn-primary"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#030014] flex flex-col select-none touch-none">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-aurora-purple/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-aurora-cyan/15 rounded-full blur-[100px]" />
-      </div>
+    <div className="min-h-screen bg-dark-950 flex flex-col select-none touch-none relative overflow-hidden text-white">
+      <BackgroundParticles />
 
+      {/* Header */}
       <motion.header
-        className="relative z-10 p-4 flex items-center justify-between border-b border-white/5"
+        className="relative z-10 px-6 py-4 flex items-center justify-between border-b border-white/5 bg-dark-950/50 backdrop-blur-md"
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
       >
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-aurora-purple to-aurora-cyan flex items-center justify-center">
-            <Smartphone className="w-4 h-4 text-white" />
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+            <Smartphone className="w-5 h-5 text-white/80" />
           </div>
           <div>
-            <p className="text-white text-sm font-medium">Remote Control</p>
-            <p className="text-white/40 text-xs">Session: {sessionId}</p>
+            <h1 className="font-display font-semibold text-sm leading-tight">Remote Control</h1>
+            <p className="text-white/30 text-[10px] font-mono tracking-wider">ID: {sessionId}</p>
           </div>
         </div>
 
-        <div className={`flex items-center gap-2 py-1.5 px-3 rounded-full text-xs font-medium
-          ${presenterConnected ? 'bg-aurora-cyan/10 text-aurora-cyan' : 'bg-amber-500/10 text-amber-400'}`}>
+        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors duration-300
+          ${presenterConnected
+            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+            : 'bg-amber-500/10 border-amber-500/20 text-amber-400'}`}>
           {presenterConnected ? (
-            <><Wifi className="w-3 h-3" /><span>Connected</span></>
+            <><Wifi className="w-3 h-3" /><span>Linked</span></>
           ) : (
-            <><motion.div animate={{ opacity: [1, 0.5, 1] }} transition={{ duration: 1, repeat: Infinity }}><WifiOff className="w-3 h-3" /></motion.div><span>Waiting...</span></>
+            <><Loader2 className="w-3 h-3 animate-spin" /><span>Syncing...</span></>
           )}
         </div>
       </motion.header>
 
-      <div className="flex-1 relative z-10 flex flex-col items-center justify-center p-6">
-        <motion.div className="mb-8 text-center" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
-          <p className="text-white/40 text-xs uppercase tracking-wider mb-1">Current Slide</p>
-          <div className="flex items-baseline justify-center gap-1">
-            <motion.span key={currentPage} className="text-5xl font-bold text-white" initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-              {currentPage || '--'}
-            </motion.span>
-            <span className="text-2xl text-white/30">/</span>
-            <span className="text-2xl text-white/50">{totalPages || '--'}</span>
+      {/* Main Controls */}
+      <div className="flex-1 relative z-10 flex flex-col items-center justify-center p-6 gap-8">
+
+        {/* Slide Counter */}
+        <motion.div
+          className="text-center"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="inline-flex items-baseline justify-center gap-1.5">
+            <span className="text-6xl font-display font-bold text-white tracking-tight">
+              {currentPage || '-'}
+            </span>
+            <span className="text-2xl text-white/20 font-light">/</span>
+            <span className="text-2xl text-white/40 font-medium">{totalPages || '-'}</span>
           </div>
+          <p className="text-white/30 text-xs uppercase tracking-widest mt-2 font-medium">Slide Number</p>
         </motion.div>
 
-        <motion.div className="w-full max-w-md flex gap-4" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
+        {/* Control Buttons */}
+        <motion.div
+          className="w-full max-w-sm grid grid-cols-2 gap-4"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
           <motion.button
             onClick={handlePrev}
-            disabled={!presenterConnected || currentPage <= 1}
-            className={`flex-1 h-32 rounded-2xl flex flex-col items-center justify-center gap-2 font-semibold text-lg transition-all duration-200
-              ${!presenterConnected || currentPage <= 1
-                ? 'bg-white/5 text-white/20 cursor-not-allowed'
-                : 'bg-gradient-to-br from-aurora-purple/30 to-aurora-purple/10 text-white border border-aurora-purple/30 active:scale-95 active:bg-aurora-purple/40'
+            disabled={!presenterConnected}
+            className={`group relative h-40 rounded-3xl flex flex-col items-center justify-center gap-3 transition-all duration-300
+              ${!presenterConnected
+                ? 'bg-white/5 border border-white/5 text-white/20 cursor-not-allowed'
+                : 'glass-panel hover:bg-white/10 active:scale-95 border-white/10'
               }`}
-            whileTap={presenterConnected && currentPage > 1 ? { scale: 0.95 } : {}}
           >
-            <motion.div animate={lastAction === 'prev' ? { x: [-5, 0] } : {}} transition={{ duration: 0.2 }}>
-              <ChevronLeft className="w-10 h-10" />
-            </motion.div>
-            <span>Previous</span>
+            <ChevronLeft className={`w-12 h-12 transition-transform duration-300 ${presenterConnected ? 'group-active:-translate-x-1 text-white' : ''}`} />
+            <span className="font-medium">Previous</span>
           </motion.button>
 
           <motion.button
             onClick={handleNext}
-            disabled={!presenterConnected || currentPage >= totalPages}
-            className={`flex-1 h-32 rounded-2xl flex flex-col items-center justify-center gap-2 font-semibold text-lg transition-all duration-200
-              ${!presenterConnected || currentPage >= totalPages
-                ? 'bg-white/5 text-white/20 cursor-not-allowed'
-                : 'bg-gradient-to-br from-aurora-cyan/30 to-aurora-cyan/10 text-white border border-aurora-cyan/30 active:scale-95 active:bg-aurora-cyan/40'
+            disabled={!presenterConnected}
+            className={`group relative h-40 rounded-3xl flex flex-col items-center justify-center gap-3 transition-all duration-300
+              ${!presenterConnected
+                ? 'bg-white/5 border border-white/5 text-white/20 cursor-not-allowed'
+                : 'glass-panel hover:bg-white/10 active:scale-95 border-white/10'
               }`}
-            whileTap={presenterConnected && currentPage < totalPages ? { scale: 0.95 } : {}}
           >
-            <motion.div animate={lastAction === 'next' ? { x: [5, 0] } : {}} transition={{ duration: 0.2 }}>
-              <ChevronRight className="w-10 h-10" />
-            </motion.div>
-            <span>Next</span>
+            <ChevronRight className={`w-12 h-12 transition-transform duration-300 ${presenterConnected ? 'group-active:translate-x-1 text-white' : ''}`} />
+            <span className="font-medium">Next</span>
           </motion.button>
         </motion.div>
-
-        <AnimatePresence>
-          {lastAction && (
-            <motion.div
-              className={`fixed inset-0 pointer-events-none flex items-center justify-center ${lastAction === 'prev' ? 'bg-aurora-purple/10' : 'bg-aurora-cyan/10'}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <motion.div
-                className={`w-24 h-24 rounded-full flex items-center justify-center ${lastAction === 'prev' ? 'bg-aurora-purple/30' : 'bg-aurora-cyan/30'}`}
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 1.5, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                {lastAction === 'prev' ? <ChevronLeft className="w-12 h-12 text-white" /> : <ChevronRight className="w-12 h-12 text-white" />}
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
-      <motion.footer
-        className="relative z-10 p-4 text-center border-t border-white/5"
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        {!presenterConnected ? (
-          <div className="flex items-center justify-center gap-2 text-amber-400 text-sm">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            <span>Waiting for presenter to connect...</span>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center gap-2 text-white/40 text-sm">
-            <Presentation className="w-4 h-4" />
-            <span>Connected to GesturePresenter</span>
-          </div>
+      {/* Visual Feedback Overlay */}
+      <AnimatePresence>
+        {lastAction && (
+          <motion.div
+            className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center bg-white/5 backdrop-blur-[2px]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
+          >
+            <motion.div
+              className="w-32 h-32 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-2xl"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 1.2, opacity: 0 }}
+            >
+              {lastAction === 'prev' ? <ChevronLeft className="w-16 h-16 text-white" /> : <ChevronRight className="w-16 h-16 text-white" />}
+            </motion.div>
+          </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* Footer */}
+      <motion.footer
+        className="relative z-10 py-6 text-center text-white/30 text-xs font-mono"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+      >
+        GesturePresenter Remote
       </motion.footer>
     </div>
   );

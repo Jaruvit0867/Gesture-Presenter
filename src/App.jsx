@@ -86,7 +86,7 @@ function MainApp() {
   const [isPresentationStarted, setIsPresentationStarted] = useState(false);
   const viewerContainerRef = useRef(null);
 
-  const { isActive: tutorialActive, startTutorial } = useTutorial();
+  const { isActive: tutorialActive, startTutorial, hasCompleted: tutorialCompleted } = useTutorial();
 
   const {
     pageImage,
@@ -99,6 +99,14 @@ function MainApp() {
     nextPage,
     prevPage,
   } = usePdfViewer();
+
+  const handleStartApp = useCallback(() => {
+    if (!tutorialCompleted) {
+      startTutorial();
+    } else {
+      setIsPresentationStarted(true);
+    }
+  }, [tutorialCompleted, startTutorial]);
 
   const handleSwipeLeft = useCallback(() => {
     setSlideDirection('prev');
@@ -294,7 +302,7 @@ function MainApp() {
                 <div className="flex items-center gap-4">
                   {/* Primary Button - White */}
                   <motion.button
-                    onClick={() => setIsPresentationStarted(true)}
+                    onClick={handleStartApp}
                     className="btn-primary flex items-center gap-2 text-base"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
