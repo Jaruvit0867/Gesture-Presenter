@@ -58,16 +58,14 @@ export function GestureCamera({
         relative overflow-hidden
         ${isMini
           ? 'rounded-2xl opacity-90 hover:opacity-100 transition-all duration-300'
-          : 'glass rounded-3xl p-6 border border-dark-700/50'
+          : 'glass-panel rounded-3xl p-6'
         }
       `}
     >
-      {/* Background glow effect */}
-      {!isMini && (
+      {/* Background glow effect - Removed blur for performance */}
+      {!isMini && isActive && (
         <div className="absolute inset-0 pointer-events-none">
-          <div className={`absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl transition-all duration-1000 ${
-            isActive ? 'bg-aurora-cyan/20' : 'bg-transparent'
-          }`} />
+          <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-10 bg-white transition-all duration-1000" />
         </div>
       )}
 
@@ -76,29 +74,23 @@ export function GestureCamera({
         {!isMini && (
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
-              {/* Icon container */}
+              {/* Icon container - simplified without blur */}
               <div className="relative">
-                <div className={`absolute inset-0 rounded-xl blur-md transition-all duration-500 ${
-                  isActive ? 'bg-aurora-cyan/40' : 'bg-transparent'
-                }`} />
-                <div className="relative w-10 h-10 rounded-xl bg-dark-800 border border-dark-700 flex items-center justify-center">
-                  <Hand className={`w-5 h-5 transition-colors duration-300 ${
-                    isActive ? 'text-aurora-cyan' : 'text-slate-500'
-                  }`} />
+                <div className="relative w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                  <Hand className={`w-5 h-5 transition-colors duration-300 ${isActive ? 'text-white' : 'text-white/40'
+                    }`} />
                 </div>
               </div>
 
               <div>
-                <span className="font-display font-bold text-white text-sm">Gesture Control</span>
+                <span className="font-display font-medium text-white text-sm">Gesture Control</span>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <div className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                    isActive
-                      ? 'bg-aurora-emerald animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]'
-                      : 'bg-slate-600'
-                  }`} />
-                  <span className={`text-[10px] uppercase tracking-wider font-medium ${
-                    isActive ? 'text-aurora-emerald' : 'text-slate-500'
-                  }`}>
+                  <div className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${isActive
+                    ? 'bg-emerald-400 animate-pulse'
+                    : 'bg-white/20'
+                    }`} />
+                  <span className={`text-[10px] uppercase tracking-wider font-medium ${isActive ? 'text-emerald-400' : 'text-white/40'
+                    }`}>
                     {isActive ? 'Online' : 'Offline'}
                   </span>
                 </div>
@@ -108,16 +100,16 @@ export function GestureCamera({
             {/* Toggle button */}
             <motion.button
               onClick={isActive ? onStop : onStart}
-              className="relative overflow-hidden rounded-xl"
+              className="relative overflow-hidden rounded-full"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
               <div className={`
-                flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider
+                flex items-center gap-2 px-4 py-2 rounded-full font-medium text-xs uppercase tracking-wider
                 transition-all duration-300 border
                 ${isActive
-                  ? 'bg-aurora-pink/10 text-aurora-pink border-aurora-pink/20 hover:bg-aurora-pink/20'
-                  : 'bg-aurora-cyan/10 text-aurora-cyan border-aurora-cyan/20 hover:bg-aurora-cyan/20'
+                  ? 'bg-white/10 text-white border-white/20 hover:bg-white/20'
+                  : 'bg-white text-black border-transparent hover:bg-white/90'
                 }
               `}>
                 {isActive ? (
@@ -140,8 +132,8 @@ export function GestureCamera({
         <div className={`
           relative overflow-hidden
           ${isMini
-            ? 'aspect-video rounded-xl'
-            : 'aspect-video rounded-2xl border border-dark-700/50'
+            ? 'aspect-video rounded-xl border border-white/10'
+            : 'aspect-video rounded-2xl border border-white/10 bg-black/40'
           }
         `}>
           {/* Video feed */}
@@ -154,48 +146,39 @@ export function GestureCamera({
               w-full h-full object-cover camera-mirror
               ${!isActive && 'hidden'}
             `}
-            style={{
-              filter: 'contrast(1.05) saturate(0.9)',
-            }}
           />
 
-          {/* Scan line overlay when active */}
+          {/* Simple border indicator when active - removed scan line for performance */}
           {isActive && (
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <motion.div
-                className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-aurora-cyan/50 to-transparent"
-                animate={{ top: ['0%', '100%'] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-              />
-            </div>
+            <div className="absolute inset-0 border-2 border-white/10 rounded-2xl pointer-events-none" />
           )}
 
           {/* Corner brackets */}
           {isActive && !isMini && (
             <>
-              <div className="absolute top-3 left-3 w-6 h-6 border-l-2 border-t-2 border-aurora-cyan/50 rounded-tl" />
-              <div className="absolute top-3 right-3 w-6 h-6 border-r-2 border-t-2 border-aurora-cyan/50 rounded-tr" />
-              <div className="absolute bottom-3 left-3 w-6 h-6 border-l-2 border-b-2 border-aurora-cyan/50 rounded-bl" />
-              <div className="absolute bottom-3 right-3 w-6 h-6 border-r-2 border-b-2 border-aurora-cyan/50 rounded-br" />
+              <div className="absolute top-3 left-3 w-6 h-6 border-l-2 border-t-2 border-white/30 rounded-tl" />
+              <div className="absolute top-3 right-3 w-6 h-6 border-r-2 border-t-2 border-white/30 rounded-tr" />
+              <div className="absolute bottom-3 left-3 w-6 h-6 border-l-2 border-b-2 border-white/30 rounded-bl" />
+              <div className="absolute bottom-3 right-3 w-6 h-6 border-r-2 border-b-2 border-white/30 rounded-br" />
             </>
           )}
 
           {/* Placeholder when inactive */}
           {!isActive && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-dark-900">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-transparent">
               {/* Grid pattern */}
-              <div className="absolute inset-0 cyber-grid opacity-30" />
+              <div className="absolute inset-0 cyber-grid opacity-10" />
 
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="text-center relative z-10"
               >
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-dark-800 border border-dark-700 flex items-center justify-center">
-                  <WifiOff className="w-8 h-8 text-slate-600" />
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                  <WifiOff className="w-8 h-8 text-white/20" />
                 </div>
-                <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">Camera Offline</p>
-                <p className="text-xs text-slate-600 mt-1">Click enable to start</p>
+                <p className="text-sm font-medium text-white/40 uppercase tracking-wider">Camera Offline</p>
+                <p className="text-xs text-white/20 mt-1">Click enable to start</p>
               </motion.div>
             </div>
           )}
@@ -207,15 +190,15 @@ export function GestureCamera({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 flex items-center justify-center bg-dark-900/95 backdrop-blur-sm"
+                className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm"
               >
                 <div className="text-center p-6 max-w-[200px]">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-aurora-pink/10 flex items-center justify-center">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-red-500/10 flex items-center justify-center">
                     <span className="text-xl">⚠️</span>
                   </div>
-                  <p className="text-aurora-pink font-bold text-sm mb-1">Access Denied</p>
-                  <p className="text-slate-500 text-xs leading-relaxed">
-                    Camera permission required for gesture detection
+                  <p className="text-white font-bold text-sm mb-1">Access Denied</p>
+                  <p className="text-white/40 text-xs leading-relaxed">
+                    Camera permission required
                   </p>
                 </div>
               </motion.div>
@@ -232,7 +215,7 @@ export function GestureCamera({
                 className={`absolute left-2 right-2 ${isMini ? 'bottom-2' : 'bottom-3'}`}
               >
                 <div className={`
-                  glass-strong rounded-xl flex items-center justify-between
+                  glass-strong rounded-xl flex items-center justify-between border border-white/10
                   ${isMini ? 'px-2 py-1.5' : 'px-4 py-3'}
                 `}>
                   {/* Status */}
@@ -243,7 +226,7 @@ export function GestureCamera({
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       className={`
-                        ${info.bgColor} rounded-lg flex items-center justify-center
+                        ${info.bgColor} rounded-lg flex items-center justify-center bg-white/10
                         ${isMini ? 'w-8 h-8 text-base' : 'w-12 h-12 text-2xl'}
                       `}
                     >
@@ -256,16 +239,16 @@ export function GestureCamera({
                         key={info.label}
                         initial={{ y: -5, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        className={`font-bold ${info.color} ${isMini ? 'text-[10px]' : 'text-sm'} uppercase tracking-wide`}
+                        className={`font-medium text-white ${isMini ? 'text-[10px]' : 'text-sm'} uppercase tracking-wide`}
                       >
                         {info.label}
                       </motion.p>
                       {!isMini && (
-                        <p className="text-[10px] text-slate-500 mt-0.5 uppercase tracking-wider">
+                        <p className="text-[10px] text-white/40 mt-0.5 uppercase tracking-wider">
                           {info.status === 'active' ? 'Tracking enabled' :
-                           info.status === 'ready' ? 'Swipe to navigate' :
-                           info.status === 'paused' ? 'Detection paused' :
-                           'Waiting for hand'}
+                            info.status === 'ready' ? 'Swipe to navigate' :
+                              info.status === 'paused' ? 'Detection paused' :
+                                'Waiting for hand'}
                         </p>
                       )}
                     </div>
@@ -284,7 +267,7 @@ export function GestureCamera({
                             stroke="currentColor"
                             strokeWidth="3"
                             fill="none"
-                            className="text-dark-700"
+                            className="text-white/10"
                           />
                           <motion.circle
                             cx="24"
@@ -294,14 +277,14 @@ export function GestureCamera({
                             strokeWidth="3"
                             fill="none"
                             strokeLinecap="round"
-                            className="text-aurora-cyan"
+                            className="text-white"
                             strokeDasharray={126}
                             initial={{ strokeDashoffset: 126 }}
                             animate={{ strokeDashoffset: 126 - (126 * displayGesture.confidence) }}
                             transition={{ duration: 0.3 }}
                           />
                         </svg>
-                        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-aurora-cyan">
+                        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white">
                           {Math.round(displayGesture.confidence * 100)}%
                         </span>
                       </div>
@@ -313,31 +296,19 @@ export function GestureCamera({
           </AnimatePresence>
         </div>
 
-        {/* Gesture guide */}
+        {/* Gesture guide - More compact */}
         {!isMini && (
-          <div className="mt-5 grid grid-cols-4 gap-2">
+          <div className="mt-4 grid grid-cols-4 gap-1.5">
             {gestureGuide.map((item, i) => (
-              <motion.div
+              <div
                 key={i}
-                className="relative group"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                className="bg-white/5 rounded-lg p-2 text-center border border-white/5"
               >
-                <div className="bg-dark-800/60 rounded-xl p-3 text-center border border-dark-700/50 group-hover:border-aurora-cyan/30 transition-all duration-300">
-                  {/* Icon */}
-                  <div className="text-xl mb-1.5 group-hover:scale-110 transition-transform duration-300">
-                    {item.icon}
-                  </div>
-                  {/* Label */}
-                  <p className="text-[10px] font-bold text-white uppercase tracking-tight">
-                    {item.label}
-                  </p>
-                  {/* Description */}
-                  <p className="text-[9px] text-slate-500 mt-0.5">
-                    {item.desc}
-                  </p>
-                </div>
-              </motion.div>
+                <div className="text-lg mb-0.5">{item.icon}</div>
+                <p className="text-[9px] font-medium text-white/60 uppercase tracking-tight">
+                  {item.label}
+                </p>
+              </div>
             ))}
           </div>
         )}
