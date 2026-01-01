@@ -158,7 +158,7 @@ export default function TutorialOverlay({ gesture, onStartCamera, cameraActive, 
       >
         {/* Subtle darkened backdrop for welcome/completed */}
         {(isFirstStep || isLastStep) && (
-          <div className="absolute inset-0 bg-dark-950/70 backdrop-blur-sm pointer-events-auto" />
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm pointer-events-auto" />
         )}
 
         {/* Floating Tooltip Card */}
@@ -171,35 +171,35 @@ export default function TutorialOverlay({ gesture, onStartCamera, cameraActive, 
           className={`absolute ${getPositionClasses()} w-80 pointer-events-auto`}
         >
           <div className={`
-            glass-strong rounded-2xl border overflow-hidden shadow-2xl
+            glass-strong rounded-2xl overflow-hidden shadow-2xl
             ${isComplete && isPracticeStep
-              ? 'border-aurora-emerald/50 shadow-aurora-emerald/20'
-              : 'border-aurora-cyan/30 shadow-aurora-cyan/10'
+              ? 'border-emerald-500/30'
+              : ''
             }
           `}>
             {/* Header */}
-            <div className="px-5 py-4 border-b border-dark-700/50 flex items-center justify-between">
+            <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className={`
                   w-10 h-10 rounded-xl flex items-center justify-center
                   ${isComplete && isPracticeStep
-                    ? 'bg-aurora-emerald/20'
-                    : 'bg-gradient-to-br from-aurora-cyan/20 to-aurora-purple/20'
+                    ? 'bg-emerald-500/20'
+                    : 'bg-white/10'
                   }
                 `}>
                   {isComplete && isPracticeStep ? (
-                    <CheckCircle2 className="w-5 h-5 text-aurora-emerald" />
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                   ) : Icon ? (
-                    <Icon className="w-5 h-5 text-aurora-cyan" />
+                    <Icon className="w-5 h-5 text-white/80" />
                   ) : (
-                    <Sparkles className="w-5 h-5 text-aurora-cyan" />
+                    <Sparkles className="w-5 h-5 text-white/80" />
                   )}
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-wider">Tutorial</p>
-                  <div className="w-20 h-1 bg-dark-700 rounded-full overflow-hidden mt-1">
+                  <p className="text-[10px] text-white/40 uppercase tracking-wider">Tutorial</p>
+                  <div className="w-20 h-1 bg-white/10 rounded-full overflow-hidden mt-1">
                     <motion.div
-                      className="h-full bg-gradient-to-r from-aurora-cyan to-aurora-purple"
+                      className="h-full bg-white/60"
                       initial={{ width: 0 }}
                       animate={{ width: `${progress}%` }}
                     />
@@ -209,7 +209,7 @@ export default function TutorialOverlay({ gesture, onStartCamera, cameraActive, 
 
               <motion.button
                 onClick={skipTutorial}
-                className="w-7 h-7 rounded-lg bg-dark-800 border border-dark-700 flex items-center justify-center text-slate-500 hover:text-white hover:border-aurora-pink/50 transition-all"
+                className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
@@ -219,10 +219,10 @@ export default function TutorialOverlay({ gesture, onStartCamera, cameraActive, 
 
             {/* Content */}
             <div className="p-5">
-              <h3 className="font-display font-bold text-white text-lg mb-2">
+              <h3 className="font-display font-medium text-white text-lg mb-2">
                 {config.title}
               </h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
+              <p className="text-white/60 text-sm leading-relaxed">
                 {config.description}
               </p>
 
@@ -231,11 +231,11 @@ export default function TutorialOverlay({ gesture, onStartCamera, cameraActive, 
                 <div className={`
                   mt-4 p-3 rounded-xl border text-center
                   ${isComplete
-                    ? 'bg-aurora-emerald/10 border-aurora-emerald/30'
-                    : 'bg-aurora-purple/10 border-aurora-purple/30'
+                    ? 'bg-emerald-500/10 border-emerald-500/20'
+                    : 'bg-white/5 border-white/10'
                   }
                 `}>
-                  <p className={`text-sm font-bold ${isComplete ? 'text-aurora-emerald' : 'text-aurora-purple'}`}>
+                  <p className={`text-sm font-medium ${isComplete ? 'text-emerald-400' : 'text-white/70'}`}>
                     {isComplete ? '✓ Great job!' : 'Show me the gesture...'}
                   </p>
                 </div>
@@ -245,7 +245,7 @@ export default function TutorialOverlay({ gesture, onStartCamera, cameraActive, 
               {currentStep === TUTORIAL_STEPS.ENABLE_CAMERA && !cameraActive && (
                 <motion.button
                   onClick={onStartCamera}
-                  className="mt-4 w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-aurora-cyan to-aurora-purple text-white font-bold text-sm flex items-center justify-center gap-2"
+                  className="mt-4 w-full py-2.5 px-4 rounded-full bg-white text-black font-medium text-sm flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -256,18 +256,18 @@ export default function TutorialOverlay({ gesture, onStartCamera, cameraActive, 
             </div>
 
             {/* Footer */}
-            <div className="px-5 py-3 border-t border-dark-700/50 flex items-center justify-between">
+            <div className="px-5 py-3 border-t border-white/5 flex items-center justify-between">
               <button
                 onClick={skipTutorial}
-                className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+                className="text-xs text-white/40 hover:text-white transition-colors"
               >
-                Skip tutorial
+                Skip
               </button>
 
               {(isFirstStep || isLastStep || isComplete) && (
                 <motion.button
                   onClick={isLastStep ? skipTutorial : nextStep}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-r from-aurora-cyan to-aurora-purple text-white font-bold text-xs"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-white/10 hover:bg-white/10 text-white font-medium text-xs transition-colors"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -285,7 +285,7 @@ export default function TutorialOverlay({ gesture, onStartCamera, cameraActive, 
               ${config.position === 'left' ? '-right-6' : '-left-6'}
             `}>
               <ArrowRight className={`
-                w-5 h-5 text-aurora-cyan animate-pulse
+                w-5 h-5 text-emerald-400 animate-pulse
                 ${config.position === 'left' ? '' : 'rotate-180'}
               `} />
             </div>

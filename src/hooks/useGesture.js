@@ -242,12 +242,33 @@ export function useGesture({ onSwipeLeft, onSwipeRight, onPause }) {
     setIsActive(false);
     setGesture({ name: 'WAITING', fingerCount: 0, confidence: 0 });
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    if (videoRef.current?.srcObject) {
-      videoRef.current.srcObject.getTracks().forEach(t => t.stop());
+
+    // Stop tracks from the persistent stream ref
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+
+    // Also clear video element source
+    if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+
     if (handsRef.current) { try { await handsRef.current.close(); } catch (e) { } handsRef.current = null; }
   }, []);
+
+  // Stream persistence
+  const streamRef = useRef(null);
+
+  // Re-attach stream when video element changes/mounts
+  useEffect(() => {
+    if (videoRef.current && streamRef.current && !videoRef.current.srcObject) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.onloadedmetadata = () => {
+        videoRef.current.play().catch(e => console.error("Error playing video:", e));
+      };
+    }
+  }); // Run on every render to check if ref changed
 
   const start = useCallback(async () => {
     if (isInitializingRef.current || isActiveRef.current) return;
@@ -274,6 +295,7 @@ export function useGesture({ onSwipeLeft, onSwipeRight, onPause }) {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
       });
+      streamRef.current = stream;
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;

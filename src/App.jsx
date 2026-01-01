@@ -15,9 +15,73 @@ import { TutorialProvider, useTutorial } from './contexts/TutorialContext';
 import TutorialOverlay from './components/tutorial/TutorialOverlay';
 import { Sparkles, Zap, Shield, Upload, Camera, Presentation, Play, X, GraduationCap, ArrowLeft, ChevronDown } from 'lucide-react';
 
+// Kinetic Text Component
+const KineticText = ({ text, className = '' }) => {
+  const container = {
+    hidden: { opacity: 0 },
+    visible: (i = 1) => ({
+      opacity: 1,
+      transition: { staggerChildren: 0.08, delayChildren: 0.04 * i },
+    }),
+  };
+
+  const child = {
+    visible: {
+      opacity: 1,
+      y: 0,
+      rotateX: 0,
+      transition: {
+        type: 'spring',
+        damping: 12,
+        stiffness: 100,
+      },
+    },
+    hidden: {
+      opacity: 0,
+      y: 20,
+      rotateX: -90,
+      transition: {
+        type: 'spring',
+        damping: 12,
+        stiffness: 100,
+      },
+    },
+  };
+
+  return (
+    <motion.div
+      variants={container}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      className={`inline-block ${className}`}
+    >
+      {text.split('').map((char, index) => (
+        <motion.span
+          variants={child}
+          key={index}
+          className="inline-block cursor-default"
+          style={{ transformStyle: 'preserve-3d' }}
+          whileHover={{
+            scale: 1.2,
+            rotate: Math.random() * 10 - 5,
+            y: -5,
+            color: '#fff',
+            textShadow: '0 0 8px rgba(255,255,255,0.5)',
+            transition: { duration: 0.2 }
+          }}
+        >
+          {char === ' ' ? '\u00A0' : char}
+        </motion.span>
+      ))}
+    </motion.div>
+  );
+};
+
 function MainApp() {
   const [swipeIndicator, setSwipeIndicator] = useState({ visible: false, direction: null });
   const [slideDirection, setSlideDirection] = useState('next');
+  const [pointerColor, setPointerColor] = useState('#10b981'); // Default Emerald
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isPresentationStarted, setIsPresentationStarted] = useState(false);
   const viewerContainerRef = useRef(null);
@@ -171,107 +235,112 @@ function MainApp() {
     <div className="min-h-screen bg-dark-950 relative overflow-hidden">
       <BackgroundParticles />
 
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="aurora-orb w-[600px] h-[600px] bg-aurora-cyan/20 -top-[20%] -left-[10%]" style={{ animationDelay: '0s' }} />
-        <div className="aurora-orb w-[500px] h-[500px] bg-aurora-purple/20 top-[30%] -right-[15%]" style={{ animationDelay: '5s' }} />
-        <div className="aurora-orb w-[400px] h-[400px] bg-aurora-pink/15 -bottom-[10%] left-[20%]" style={{ animationDelay: '10s' }} />
-      </div>
-
       <Header />
 
       <main className="relative z-10 px-6 pb-12">
         <div className="max-w-7xl mx-auto">
           {/* Hero Section - Always visible when not in presentation mode */}
           {!isPresentationStarted && !isFullscreen && (
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} className="text-center pt-16 pb-20">
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} className="text-center pt-20 pb-24">
 
-              <h2 className="font-display text-6xl md:text-8xl font-bold text-white tracking-tight mb-8 leading-tight">
-                Control Slides with<br /><span className="gradient-text">Hand Gestures</span>
+              {/* Badge */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-sm text-white/70 font-medium">AI-Powered Control</span>
+              </motion.div>
+
+              <h2 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-8 leading-[1.1]">
+                <KineticText text="Control Slides with" className="text-white/90 text-aura" />
+                <br />
+                <KineticText text="Hand Gestures" className="text-white pb-2 text-aura" />
               </h2>
 
-              <p className="text-slate-400 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed mb-12">
+              <p className="text-white/50 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-14">
                 Experience the future of presentations. Navigate your slides naturally with intuitive hand movements - no clicker needed.
               </p>
 
-              <div className="flex flex-wrap justify-center gap-5 mb-14">
+              {/* Feature Pills */}
+              <div className="flex flex-wrap justify-center gap-3 mb-12">
                 {[
-                  { icon: Zap, label: 'Real-time Detection', color: 'aurora-cyan' },
-                  { icon: Shield, label: '100% Private', color: 'aurora-emerald' },
-                  { icon: Sparkles, label: 'Computer Vision', color: 'aurora-purple' },
+                  { icon: Zap, label: 'Real-time Detection' },
+                  { icon: Shield, label: '100% Private' },
+                  { icon: Sparkles, label: 'Computer Vision' },
                 ].map((item, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 + i * 0.1 }} className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-dark-800/60 border border-dark-600/50 backdrop-blur-sm">
-                    <item.icon className={`w-5 h-5 text-${item.color}`} />
-                    <span className="text-base text-slate-300 font-medium">{item.label}</span>
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 + i * 0.1 }}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10"
+                  >
+                    <item.icon className="w-4 h-4 text-white/60" />
+                    <span className="text-sm text-white/60">{item.label}</span>
                   </motion.div>
                 ))}
               </div>
 
-              {/* Start Presentation & Tutorial Buttons */}
+              {/* Buttons */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7 }}
-                className="flex flex-col items-center gap-6"
+                className="flex flex-col items-center gap-8"
               >
-                {/* Main buttons row */}
-                <div className="flex items-center gap-5">
-                  {/* Start Presentation Button */}
+                <div className="flex items-center gap-4">
+                  {/* Primary Button - White */}
                   <motion.button
                     onClick={() => setIsPresentationStarted(true)}
-                    className="group relative flex items-center gap-4 px-10 py-5 rounded-2xl bg-gradient-to-r from-aurora-cyan via-neon-primary to-aurora-purple text-white font-bold text-xl overflow-hidden shadow-xl shadow-aurora-purple/20"
-                    whileHover={{ scale: 1.03, boxShadow: '0 25px 50px rgba(99, 102, 241, 0.4)' }}
+                    className="btn-primary flex items-center gap-2 text-base"
+                    whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    {/* Shimmer effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-
-                    <div className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm">
-                      <Play className="w-6 h-6 fill-current" />
-                    </div>
-                    <span className="relative">Start Presentation</span>
-                    <Sparkles className="w-6 h-6 relative opacity-70" />
+                    <Play className="w-4 h-4 fill-current" />
+                    <span>Start Free</span>
                   </motion.button>
 
-                  {/* Tutorial Button */}
+                  {/* Secondary Button - Outline */}
                   {!tutorialActive && (
                     <motion.button
                       onClick={startTutorial}
-                      className="flex items-center gap-3 px-8 py-5 rounded-2xl bg-aurora-purple/10 border-2 border-aurora-purple/30 text-aurora-purple hover:bg-aurora-purple/20 transition-all font-bold text-lg"
+                      className="btn-secondary flex items-center gap-2 text-base"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
-                      <GraduationCap className="w-6 h-6" />
+                      <div className="w-2 h-2 rounded-full bg-white/60" />
                       <span>Tutorial</span>
                     </motion.button>
                   )}
                 </div>
 
-                {/* How It Works button */}
+                {/* How It Works link */}
                 <motion.a
                   href="#how-it-works"
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl bg-dark-800/80 border border-dark-600 hover:border-aurora-cyan/50 hover:bg-dark-700/80 text-slate-300 hover:text-aurora-cyan transition-all font-medium"
-                  whileHover={{ scale: 1.02, y: 2 }}
-                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center gap-1.5 text-white/40 hover:text-white/70 transition-colors text-sm"
+                  whileHover={{ y: 2 }}
                 >
                   <span>How It Works</span>
-                  <ChevronDown className="w-5 h-5 animate-bounce" />
+                  <ChevronDown className="w-4 h-4" />
                 </motion.a>
               </motion.div>
 
               {/* Scroll indicator */}
               <motion.div
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
+                animate={{ opacity: 0.4 }}
                 transition={{ delay: 1.2 }}
-                className="mt-20 flex flex-col items-center gap-3"
+                className="mt-24 flex flex-col items-center gap-3"
               >
-                <span className="text-sm text-slate-500 uppercase tracking-widest">Scroll to explore</span>
                 <motion.div
-                  animate={{ y: [0, 10, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-                  className="w-6 h-10 rounded-full border-2 border-slate-600 flex items-start justify-center p-1.5"
+                  animate={{ y: [0, 8, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                  className="w-5 h-9 rounded-full border border-white/20 flex items-center justify-center p-1.5"
                 >
-                  <div className="w-2 h-3 rounded-full bg-slate-500" />
+                  <div className="w-1 h-2 rounded-full bg-white/40" />
                 </motion.div>
               </motion.div>
             </motion.div>
@@ -287,7 +356,7 @@ function MainApp() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-40 bg-dark-950/90 backdrop-blur-sm"
+                    className="fixed inset-0 z-40 bg-black/10 backdrop-blur-[1px]"
                   />
                 )}
 
@@ -300,19 +369,23 @@ function MainApp() {
                   transition={{ duration: 0.2 }}
                   className={`${isFullscreen
                     ? 'fixed inset-0 z-50 bg-dark-950'
-                    : 'fixed inset-4 md:inset-8 z-50 glass-strong rounded-3xl border border-aurora-purple/30 overflow-hidden'}`}
+                    : 'fixed inset-4 md:inset-8 z-50 glass-strong rounded-3xl overflow-hidden'}`}
                 >
                   {/* Close/Back Button - only show when not fullscreen */}
                   {!isFullscreen && (
                     <motion.button
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.2 }}
-                      onClick={() => setIsPresentationStarted(false)}
-                      className="absolute top-6 left-6 z-[60] flex items-center gap-2 px-4 py-2 rounded-xl bg-dark-800/80 border border-dark-700/50 text-slate-300 hover:text-white hover:bg-dark-700/80 transition-all backdrop-blur-sm"
+                      onClick={() => {
+                        setIsPresentationStarted(false);
+                        stopCamera();
+                      }}
+                      className="absolute top-5 right-5 z-[60] text-white/40 hover:text-white transition-colors"
+                      whileHover={{ scale: 1.1, rotate: 90 }}
+                      whileTap={{ scale: 0.9 }}
                     >
-                      <ArrowLeft className="w-4 h-4" />
-                      <span className="text-sm font-medium">Back</span>
+                      <X className="w-6 h-6" />
                     </motion.button>
                   )}
 
@@ -321,7 +394,8 @@ function MainApp() {
                     <div className={`h-full grid gap-6 ${isFullscreen ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'}`}>
                       {/* PDF Viewer */}
                       <div className={`${isFullscreen ? 'h-full w-full' : 'lg:col-span-2 h-full'}`}>
-                        <div className={`h-full ${isFullscreen ? '' : 'glass rounded-2xl p-6 border border-dark-700/50'}`}>
+                        <div className={`h-full ${isFullscreen ? '' : 'glass-panel rounded-2xl p-6 relative overflow-hidden'}`}>
+                          {/* Add subtle noise or gradient to panel background if needed */}
                           <PdfViewer
                             pageImage={pageImage}
                             currentPage={currentPage}
@@ -336,13 +410,15 @@ function MainApp() {
                             isFullscreen={isFullscreen}
                             onToggleFullscreen={handleToggleFullscreen}
                             pointer={pointer}
+                            pointerColor={pointerColor}
+                            onSetPointerColor={setPointerColor}
                           />
                         </div>
                       </div>
 
                       {/* Sidebar - Camera, Remote, Tips - Only show when NOT fullscreen */}
                       {!isFullscreen && (
-                        <div className="lg:col-span-1 flex flex-col gap-3 overflow-y-auto max-h-full">
+                        <div className="lg:col-span-1 flex flex-col gap-1.5 h-full overflow-hidden">
                           {/* Gesture Camera */}
                           <div className="flex-shrink-0">
                             <GestureCamera
@@ -361,7 +437,7 @@ function MainApp() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 }}
-                            className="flex-shrink-0 glass rounded-xl p-4 border border-dark-700/50"
+                            className="flex-shrink-0 glass-panel rounded-xl p-2.5"
                           >
                             <RemoteQRCode
                               sessionId={sessionId}
@@ -377,19 +453,23 @@ function MainApp() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="flex-shrink-0 glass rounded-xl p-4 border border-dark-700/50"
+                            className="flex-1 glass-panel rounded-xl p-4 flex flex-col min-h-0"
                           >
-                            <h3 className="font-display font-bold text-white mb-2 flex items-center gap-2 text-sm">
-                              <div className="w-5 h-5 rounded-md bg-aurora-cyan/10 flex items-center justify-center">
-                                <Zap className="w-3 h-3 text-aurora-cyan" />
+                            <h3 className="font-display font-medium text-white mb-2 flex items-center gap-2 text-sm shrink-0">
+                              <div className="w-5 h-5 rounded-md bg-white/5 border border-white/10 flex items-center justify-center">
+                                <Zap className="w-3 h-3 text-white/80" />
                               </div>
                               Quick Tips
                             </h3>
-                            <ul className="space-y-1.5">
-                              {['Arrow keys for manual control', 'Fist gesture to pause', 'Point finger for pointer'].map((tip, i) => (
-                                <li key={i} className="flex items-center gap-2 text-slate-400">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-aurora-cyan flex-shrink-0" />
-                                  <span className="text-xs">{tip}</span>
+                            <ul className="flex-1 flex flex-col justify-between py-2">
+                              {[
+                                'Make a Fist ✊ after swipe to reset position (Best Flow)',
+                                'Swipe open palm 👋 to change slides',
+                                'Point index finger ☝️ to use laser pointer'
+                              ].map((tip, i) => (
+                                <li key={i} className="flex items-start gap-3 text-white/60">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-white/20 flex-shrink-0 mt-1.5" />
+                                  <span className="text-xs leading-relaxed">{tip}</span>
                                 </li>
                               ))}
                             </ul>
@@ -437,29 +517,28 @@ function MainApp() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ amount: 0.15 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
-              className="mt-[15vh]"
+              className="mt-[15vh] pb-20"
             >
               <div className="text-center mb-16">
-                <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-aurora-purple/20 mb-6">
-                  <span className="text-xs font-medium text-aurora-purple uppercase tracking-wider">Simple Setup</span>
+                <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-6">
+                  <span className="text-xs font-medium text-white/60 uppercase tracking-wider">Simple Setup</span>
                 </motion.div>
                 <motion.h3 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }} className="font-display text-4xl md:text-5xl font-bold text-white mb-4">How It Works</motion.h3>
-                <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }} className="text-slate-400 max-w-2xl mx-auto text-lg">
+                <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }} className="text-white/50 max-w-2xl mx-auto text-lg">
                   Get started in seconds. Our AI-powered system translates your hand movements into seamless presentation controls.
                 </motion.p>
               </div>
 
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid md:grid-cols-3 gap-5">
                 {features.map((item, i) => (
                   <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 + i * 0.1, duration: 0.5 }} className="group relative">
-                    <div className={`absolute -inset-0.5 bg-gradient-to-r from-${item.color}/20 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 blur-xl transition-all duration-500`} />
-                    <div className="relative glass rounded-3xl p-8 border border-dark-700/50 group-hover:border-aurora-cyan/20 transition-all duration-500 h-full">
-                      <span className="absolute top-6 right-8 font-mono text-6xl font-bold text-dark-700 group-hover:text-dark-600 transition-colors">{item.step}</span>
-                      <div className={`relative w-16 h-16 rounded-2xl mb-6 flex items-center justify-center bg-${item.color}/10 border border-${item.color}/20 group-hover:scale-110 transition-transform duration-500`}>
-                        <item.icon className={`w-8 h-8 text-${item.color}`} />
+                    <div className="relative bg-white/[0.02] rounded-2xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300 h-full">
+                      <span className="absolute top-6 right-8 font-mono text-5xl font-bold text-white/5 group-hover:text-white/10 transition-colors">{item.step}</span>
+                      <div className="relative w-12 h-12 rounded-xl mb-6 flex items-center justify-center bg-white/5 border border-white/10">
+                        <item.icon className="w-6 h-6 text-white/70" />
                       </div>
-                      <h4 className="font-display font-bold text-white text-xl mb-3">{item.title}</h4>
-                      <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
+                      <h4 className="font-display font-semibold text-white text-lg mb-2">{item.title}</h4>
+                      <p className="text-white/40 text-sm leading-relaxed">{item.desc}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -470,22 +549,20 @@ function MainApp() {
       </main>
 
       {!isPresentationStarted && !isFullscreen && (
-        <footer className="relative z-10 py-16 border-t border-dark-800">
+        <footer className="relative z-10 py-12 border-t border-white/10">
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-aurora-cyan to-aurora-purple flex items-center justify-center"><Presentation className="w-5 h-5 text-white" /></div>
-                <div><p className="font-display font-bold text-white">GesturePresenter</p><p className="text-xs text-slate-500">Gesture Control</p></div>
+                <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/10 flex items-center justify-center"><Presentation className="w-4 h-4 text-white" /></div>
+                <span className="font-display font-medium text-white/80">GesturePresenter</span>
               </div>
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-3 text-xs text-slate-500">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-xs text-white/40">
                   <span>Built with</span>
-                  <div className="flex items-center gap-2">
-                    {['React', 'MediaPipe', 'PDF.js'].map((tech, i) => (<span key={i} className="px-2 py-1 rounded-md bg-dark-800 border border-dark-700 text-slate-400">{tech}</span>))}
-                  </div>
+                  {['React', 'MediaPipe', 'PDF.js'].map((tech, i) => (<span key={i} className="px-2 py-1 rounded-md bg-white/5 border border-white/10 text-white/50">{tech}</span>))}
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-xs text-slate-500"><Shield className="w-4 h-4 text-aurora-emerald" /><span>100% Private - All processing happens locally</span></div>
+              <div className="flex items-center gap-2 text-xs text-white/40"><Shield className="w-4 h-4 text-emerald-400/70" /><span>100% Private - All processing happens locally</span></div>
             </div>
           </div>
         </footer>
