@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { Presentation, Github, Sparkles } from 'lucide-react';
-import TutorialButton from './tutorial/TutorialButton';
 
 export function Header() {
   return (
@@ -54,23 +53,6 @@ export function Header() {
 
         {/* Navigation */}
         <nav className="flex items-center gap-3 md:gap-6">
-          {/* Capabilities link */}
-          <motion.a
-            href="#how-it-works"
-            className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:text-aurora-cyan transition-all duration-300 relative group"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <span className="relative z-10">Features</span>
-            <div className="absolute inset-0 rounded-xl bg-aurora-cyan/0 group-hover:bg-aurora-cyan/10 transition-all duration-300" />
-          </motion.a>
-
-          {/* Tutorial button */}
-          <TutorialButton />
-
-          {/* Divider */}
-          <div className="hidden md:block w-px h-6 bg-gradient-to-b from-transparent via-dark-600 to-transparent" />
-
           {/* GitHub button */}
           <motion.a
             href="https://github.com/Jaruvit0867/Gesture-Presenter"

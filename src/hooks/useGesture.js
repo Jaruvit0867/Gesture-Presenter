@@ -218,13 +218,22 @@ export function useGesture({ onSwipeLeft, onSwipeRight, onPause }) {
 
   useEffect(() => { onResultsRef.current = onResults; }, [onResults]);
 
+  // Frame counter for throttling
+  const frameCountRef = useRef(0);
+
   const processFrame = useCallback(async () => {
     if (!isActiveRef.current || !handsRef.current || !videoRef.current) return;
-    try {
-      if (videoRef.current.readyState >= 2 && !videoRef.current.paused) {
-        await handsRef.current.send({ image: videoRef.current });
-      }
-    } catch (e) { console.error('AI Loop Error:', e); }
+
+    // THROTTLE: Process every 2nd frame to reduce CPU usage
+    frameCountRef.current++;
+    if (frameCountRef.current % 2 === 0) {
+      try {
+        if (videoRef.current.readyState >= 2 && !videoRef.current.paused) {
+          await handsRef.current.send({ image: videoRef.current });
+        }
+      } catch (e) { console.error('AI Loop Error:', e); }
+    }
+
     if (isActiveRef.current) animationRef.current = requestAnimationFrame(processFrame);
   }, []);
 
@@ -254,15 +263,16 @@ export function useGesture({ onSwipeLeft, onSwipeRight, onPause }) {
       });
       hands.setOptions({
         maxNumHands: 1,
-        modelComplexity: 1, // BETTER ACCURACY (Standard model)
-        minDetectionConfidence: 0.65,
-        minTrackingConfidence: 0.65,
+        modelComplexity: 0, // LITE MODEL - Much faster, less CPU
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5,
       });
       hands.onResults((r) => onResultsRef.current?.(r));
       handsRef.current = hands;
 
+      // Lower resolution for better performance
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' }
+        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' }
       });
 
       if (videoRef.current) {

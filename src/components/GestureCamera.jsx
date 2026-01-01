@@ -62,12 +62,10 @@ export function GestureCamera({
         }
       `}
     >
-      {/* Background glow effect */}
-      {!isMini && (
+      {/* Background glow effect - Removed blur for performance */}
+      {!isMini && isActive && (
         <div className="absolute inset-0 pointer-events-none">
-          <div className={`absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl transition-all duration-1000 ${
-            isActive ? 'bg-aurora-cyan/20' : 'bg-transparent'
-          }`} />
+          <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-20 bg-aurora-cyan transition-all duration-1000" />
         </div>
       )}
 
@@ -76,29 +74,23 @@ export function GestureCamera({
         {!isMini && (
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
-              {/* Icon container */}
+              {/* Icon container - simplified without blur */}
               <div className="relative">
-                <div className={`absolute inset-0 rounded-xl blur-md transition-all duration-500 ${
-                  isActive ? 'bg-aurora-cyan/40' : 'bg-transparent'
-                }`} />
                 <div className="relative w-10 h-10 rounded-xl bg-dark-800 border border-dark-700 flex items-center justify-center">
-                  <Hand className={`w-5 h-5 transition-colors duration-300 ${
-                    isActive ? 'text-aurora-cyan' : 'text-slate-500'
-                  }`} />
+                  <Hand className={`w-5 h-5 transition-colors duration-300 ${isActive ? 'text-aurora-cyan' : 'text-slate-500'
+                    }`} />
                 </div>
               </div>
 
               <div>
                 <span className="font-display font-bold text-white text-sm">Gesture Control</span>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <div className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                    isActive
+                  <div className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${isActive
                       ? 'bg-aurora-emerald animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]'
                       : 'bg-slate-600'
-                  }`} />
-                  <span className={`text-[10px] uppercase tracking-wider font-medium ${
-                    isActive ? 'text-aurora-emerald' : 'text-slate-500'
-                  }`}>
+                    }`} />
+                  <span className={`text-[10px] uppercase tracking-wider font-medium ${isActive ? 'text-aurora-emerald' : 'text-slate-500'
+                    }`}>
                     {isActive ? 'Online' : 'Offline'}
                   </span>
                 </div>
@@ -159,15 +151,9 @@ export function GestureCamera({
             }}
           />
 
-          {/* Scan line overlay when active */}
+          {/* Simple border indicator when active - removed scan line for performance */}
           {isActive && (
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <motion.div
-                className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-aurora-cyan/50 to-transparent"
-                animate={{ top: ['0%', '100%'] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-              />
-            </div>
+            <div className="absolute inset-0 border-2 border-aurora-cyan/30 rounded-2xl pointer-events-none" />
           )}
 
           {/* Corner brackets */}
@@ -263,9 +249,9 @@ export function GestureCamera({
                       {!isMini && (
                         <p className="text-[10px] text-slate-500 mt-0.5 uppercase tracking-wider">
                           {info.status === 'active' ? 'Tracking enabled' :
-                           info.status === 'ready' ? 'Swipe to navigate' :
-                           info.status === 'paused' ? 'Detection paused' :
-                           'Waiting for hand'}
+                            info.status === 'ready' ? 'Swipe to navigate' :
+                              info.status === 'paused' ? 'Detection paused' :
+                                'Waiting for hand'}
                         </p>
                       )}
                     </div>
@@ -313,31 +299,19 @@ export function GestureCamera({
           </AnimatePresence>
         </div>
 
-        {/* Gesture guide */}
+        {/* Gesture guide - More compact */}
         {!isMini && (
-          <div className="mt-5 grid grid-cols-4 gap-2">
+          <div className="mt-4 grid grid-cols-4 gap-1.5">
             {gestureGuide.map((item, i) => (
-              <motion.div
+              <div
                 key={i}
-                className="relative group"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                className="bg-dark-800/60 rounded-lg p-2 text-center border border-dark-700/50"
               >
-                <div className="bg-dark-800/60 rounded-xl p-3 text-center border border-dark-700/50 group-hover:border-aurora-cyan/30 transition-all duration-300">
-                  {/* Icon */}
-                  <div className="text-xl mb-1.5 group-hover:scale-110 transition-transform duration-300">
-                    {item.icon}
-                  </div>
-                  {/* Label */}
-                  <p className="text-[10px] font-bold text-white uppercase tracking-tight">
-                    {item.label}
-                  </p>
-                  {/* Description */}
-                  <p className="text-[9px] text-slate-500 mt-0.5">
-                    {item.desc}
-                  </p>
-                </div>
-              </motion.div>
+                <div className="text-lg mb-0.5">{item.icon}</div>
+                <p className="text-[9px] font-bold text-white uppercase tracking-tight">
+                  {item.label}
+                </p>
+              </div>
             ))}
           </div>
         )}

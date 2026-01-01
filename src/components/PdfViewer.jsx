@@ -67,9 +67,9 @@ const SlideArea = memo(({ pageImage, currentPage, slideDirection }) => {
             filter: 'blur(10px)'
           }}
           transition={{
-            type: 'spring',
-            stiffness: 260,
-            damping: 25
+            type: 'tween',
+            duration: 0.3,
+            ease: 'easeOut'
           }}
           className="absolute inset-0 flex items-center justify-center p-6"
         >
@@ -125,85 +125,89 @@ export const PdfViewer = memo(({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header with file info */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between mb-6"
-      >
-        <div className="flex items-center gap-4">
-          {/* Icon with glow */}
-          <div className="relative group">
-            <div className="absolute inset-0 bg-neon-primary/30 rounded-2xl blur-lg group-hover:bg-aurora-cyan/40 transition-all duration-500" />
-            <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-dark-800 to-dark-900 border border-dark-700 flex items-center justify-center overflow-hidden">
-              {/* Scan line effect */}
-              <div className="absolute inset-0 bg-gradient-to-b from-aurora-cyan/10 via-transparent to-transparent opacity-50" />
-              <FileText className="w-6 h-6 text-aurora-cyan drop-shadow-[0_0_8px_rgba(0,245,255,0.6)]" />
+      {/* Header with file info - Hidden in fullscreen */}
+      {!isFullscreen && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between mb-6"
+        >
+          <div className="flex items-center gap-4">
+            {/* Icon with glow */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-neon-primary/30 rounded-2xl blur-lg group-hover:bg-aurora-cyan/40 transition-all duration-500" />
+              <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-dark-800 to-dark-900 border border-dark-700 flex items-center justify-center overflow-hidden">
+                {/* Scan line effect */}
+                <div className="absolute inset-0 bg-gradient-to-b from-aurora-cyan/10 via-transparent to-transparent opacity-50" />
+                <FileText className="w-6 h-6 text-aurora-cyan drop-shadow-[0_0_8px_rgba(0,245,255,0.6)]" />
+              </div>
+            </div>
+
+            <div>
+              <h2 className="font-display font-bold text-white tracking-tight text-lg">
+                {fileName || 'Document Viewer'}
+              </h2>
+              {totalPages > 0 && (
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-aurora-emerald animate-pulse" />
+                  <p className="text-xs text-aurora-emerald font-medium uppercase tracking-wider">
+                    {totalPages} {totalPages === 1 ? 'Slide' : 'Slides'} Ready
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
-          <div>
-            <h2 className="font-display font-bold text-white tracking-tight text-lg">
-              {fileName || 'Document Viewer'}
-            </h2>
+          <div className="flex items-center gap-3">
+            {/* Fullscreen button - Only show when PDF is loaded */}
             {totalPages > 0 && (
-              <div className="flex items-center gap-2 mt-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-aurora-emerald animate-pulse" />
-                <p className="text-xs text-aurora-emerald font-medium uppercase tracking-wider">
-                  {totalPages} {totalPages === 1 ? 'Slide' : 'Slides'} Ready
-                </p>
-              </div>
+              <motion.button
+                onClick={onToggleFullscreen}
+                className="relative p-3.5 rounded-xl group overflow-hidden"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              >
+                <div className="absolute inset-0 bg-dark-800 border border-dark-700 rounded-xl group-hover:border-aurora-cyan/30 transition-all duration-300" />
+                <div className="absolute inset-0 bg-aurora-cyan/0 group-hover:bg-aurora-cyan/10 transition-all duration-300" />
+                {isFullscreen ? (
+                  <Minimize2 className="relative w-5 h-5 text-slate-400 group-hover:text-aurora-cyan transition-colors" />
+                ) : (
+                  <Maximize2 className="relative w-5 h-5 text-slate-400 group-hover:text-aurora-cyan transition-colors" />
+                )}
+              </motion.button>
             )}
+
+            {/* Upload button */}
+            <label className="cursor-pointer">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf"
+                onChange={handleFileInput}
+                className="hidden"
+              />
+              <motion.div
+                className="relative flex items-center gap-2.5 px-6 py-3.5 rounded-xl overflow-hidden group"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {/* Button background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-aurora-cyan via-neon-primary to-aurora-purple opacity-90 group-hover:opacity-100 transition-opacity" />
+
+                {/* Shine effect */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+                </div>
+
+                {/* Content */}
+                <Upload className="relative w-4 h-4 text-white" />
+                <span className="relative text-sm font-bold text-white">Upload PDF</span>
+              </motion.div>
+            </label>
           </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Fullscreen button */}
-          <motion.button
-            onClick={onToggleFullscreen}
-            className="relative p-3.5 rounded-xl group overflow-hidden"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-          >
-            <div className="absolute inset-0 bg-dark-800 border border-dark-700 rounded-xl group-hover:border-aurora-cyan/30 transition-all duration-300" />
-            <div className="absolute inset-0 bg-aurora-cyan/0 group-hover:bg-aurora-cyan/10 transition-all duration-300" />
-            {isFullscreen ? (
-              <Minimize2 className="relative w-5 h-5 text-slate-400 group-hover:text-aurora-cyan transition-colors" />
-            ) : (
-              <Maximize2 className="relative w-5 h-5 text-slate-400 group-hover:text-aurora-cyan transition-colors" />
-            )}
-          </motion.button>
-
-          {/* Upload button */}
-          <label className="cursor-pointer">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf"
-              onChange={handleFileInput}
-              className="hidden"
-            />
-            <motion.div
-              className="relative flex items-center gap-2.5 px-6 py-3.5 rounded-xl overflow-hidden group"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              {/* Button background */}
-              <div className="absolute inset-0 bg-gradient-to-r from-aurora-cyan via-neon-primary to-aurora-purple opacity-90 group-hover:opacity-100 transition-opacity" />
-
-              {/* Shine effect */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-              </div>
-
-              {/* Content */}
-              <Upload className="relative w-4 h-4 text-white" />
-              <span className="relative text-sm font-bold text-white">Upload PDF</span>
-            </motion.div>
-          </label>
-        </div>
-      </motion.div>
+        </motion.div>
+      )}
 
       {/* Main viewer area */}
       <div
@@ -345,7 +349,7 @@ export const PdfViewer = memo(({
             className={`
               flex items-center justify-center gap-4 mt-6
               ${isFullscreen
-                ? 'fixed bottom-8 left-1/2 -translate-x-1/2 z-[60]'
+                ? 'fixed bottom-8 left-0 right-0 z-[60] flex justify-center'
                 : ''
               }
             `}
