@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Presentation, Github, Sparkles } from 'lucide-react';
+import TutorialButton from './tutorial/TutorialButton';
 
 export function Header() {
   return (
@@ -63,6 +64,9 @@ export function Header() {
             <span className="relative z-10">Features</span>
             <div className="absolute inset-0 rounded-xl bg-aurora-cyan/0 group-hover:bg-aurora-cyan/10 transition-all duration-300" />
           </motion.a>
+
+          {/* Tutorial button */}
+          <TutorialButton />
 
           {/* Divider */}
           <div className="hidden md:block w-px h-6 bg-gradient-to-b from-transparent via-dark-600 to-transparent" />

@@ -11,6 +11,8 @@ import { usePdfViewer } from './hooks/usePdfViewer';
 import { useRemoteSession } from './hooks/useRemoteSession';
 import { BackgroundParticles } from './components/BackgroundParticles';
 import RemotePage from './pages/RemotePage';
+import { TutorialProvider } from './contexts/TutorialContext';
+import TutorialOverlay from './components/tutorial/TutorialOverlay';
 import { Sparkles, Zap, Shield, Upload, Camera, Presentation } from 'lucide-react';
 
 function MainApp() {
@@ -229,6 +231,15 @@ function MainApp() {
             <SwipeIndicator direction={swipeIndicator.direction} isVisible={swipeIndicator.visible} />
           </motion.div>
 
+          {/* Tutorial Overlay */}
+          <TutorialOverlay
+            gesture={gesture}
+            onStartCamera={startCamera}
+            cameraActive={cameraActive}
+            hasPdf={!!pageImage}
+            onFileSelect={loadPdf}
+          />
+
           {!isFullscreen && (
             <motion.section id="how-it-works" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true, margin: '-100px' }} className="mt-32">
               <div className="text-center mb-16">
@@ -289,10 +300,12 @@ function MainApp() {
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<MainApp />} />
-        <Route path="/remote/:sessionId" element={<RemotePage />} />
-      </Routes>
+      <TutorialProvider>
+        <Routes>
+          <Route path="/" element={<MainApp />} />
+          <Route path="/remote/:sessionId" element={<RemotePage />} />
+        </Routes>
+      </TutorialProvider>
     </BrowserRouter>
   );
 }
